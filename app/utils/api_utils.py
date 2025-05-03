@@ -58,3 +58,49 @@ class FlowRule:
         return {
             "flow-node-inventory:flow": [flow]
         }
+        
+    def arp_flood(self):
+        match = {
+            "ethernet-match": {
+                "ethernet-type": {
+                    "type": 2054  
+                }
+            }
+        }
+        
+        actions = {
+            "order": 0,
+            "output-action": {
+                "output-node-connector": "FLOOD"
+            }
+        }
+        
+        flow = {
+            "id": self.flow_id,
+            "table_id": self.table_id,
+            "priority": self.priority,
+            "flow-name": self.flow_name,
+            "cookie": "1",
+            "cookie_mask": "255",
+            "hard-timeout": 0,
+            "idle-timeout": 0,
+            "installHw": False,
+            "barrier": False,
+            "strict": False,
+            "match": match,
+            "instructions": {
+                "instruction": [
+                    {
+                        "order": 0,
+                        "apply-actions": {
+                            "action": actions
+                        }
+                    }
+                ]
+            }
+        }
+
+        return {
+            "flow-node-inventory:flow": [flow]
+        }
+        

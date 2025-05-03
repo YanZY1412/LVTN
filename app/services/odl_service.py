@@ -95,8 +95,33 @@ def add_forward(switch_id, ip_forward_dst, flow_id, fw_port):
         return results
 
     except requests.exceptions.RequestException as e:
-        return {"error": f"An error occurred while installing block flow rule: {str(e)}"}
-    
+        return {"error": f"An error occurred while add forwarding rule: {str(e)}"}
+
+def arp_flood_service(switch_id, flow_id):
+    try: 
+        headers = {"Content-Type": "application/json"}
+        auth = HTTPBasicAuth(current_app.config['ODL_USERNAME'], current_app.config['ODL_PASSWORD'])
+        url = f"{current_app.config['ODL_BASE_URL']}/rests/data/opendaylight-inventory:nodes/node={switch_id}/flow-node-inventory:table=0/flow={flow_id}"
+
+        rule = FlowRule(
+                flow_id = f"{flow_id}",
+                table_id = 0,
+                priority = 50,
+                flow_name = "ARP broadcast",
+            )
+
+        results = []
+        body = rule.arp_flood()
+        resp = requests.put(url, json=body, auth=auth, headers=headers)
+        results.append({
+            "flow_id": rule.flow_id,
+            "status": resp.status_code,
+            "response": resp.text
+        })
+        return results
+
+    except requests.exceptions.RequestException as e:
+        return {"error": f"An error occurred while adding arp_flood: {str(e)}"}
 
 def list_rules(switch_id):
     auth = HTTPBasicAuth(current_app.config['ODL_USERNAME'], current_app.config['ODL_PASSWORD'])

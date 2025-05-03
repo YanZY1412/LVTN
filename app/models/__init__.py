@@ -1,0 +1,1 @@
+from .mininet_info import get_fixed_net_info

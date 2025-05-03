@@ -1,5 +1,5 @@
 from flask import Blueprint, request, jsonify
-from app.services.odl_service import install_block_flow_rule, list_rules, add_forward, delete_rule
+from app.services.odl_service import install_block_flow_rule, list_rules, add_forward, arp_flood_service, delete_rule
 
 rules_bp = Blueprint("rules", __name__)
 
@@ -34,6 +34,14 @@ def add_forwarding_rule():
         return jsonify({"error": "Missing switch_id or dst_ip or fw_port"}), 400
     result.extend(add_forward(switch_id, dst_ip, f"add-forward-{dst_ip.replace('.', '-') }", fw_port))
     return jsonify(result)
+
+@rules_bp.route("/arp_flood", methods=["POST"])
+def arp_flood():
+    data = request.json
+    switch_id = data.get("switch_id")
+    if not switch_id:
+        return jsonify({"error": "Missing switch_id"}), 400
+    return jsonify(arp_flood_service(switch_id, "arp"))
 
 @rules_bp.route("/delete_rule", methods=["DELETE"])
 def delete_flow_rule():
