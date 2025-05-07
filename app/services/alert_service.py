@@ -22,11 +22,14 @@ def get_alerts():
                     src_ip = alert_data.get("src_ip")
                     dest_ip = alert_data.get("dest_ip")
                     if "A Network Trojan" in category and src_ip and dest_ip:
-                        yield f'event: notify\ndata: {{"message": "Network Trojan alert detected. Blocking rule installing for {src_ip} -> {dest_ip}"}}\n\n'
+                        timestamp = alert_data.get("timestamp")
+                        yield f'event: notify\ndata: {{"message": "{timestamp} Network Trojan alert detected. Blocking rule installing for {src_ip} -> {dest_ip}"}}\n\n'
                     elif "ET SCAN" in signature and src_ip and dest_ip:
-                        yield f'event: notify\ndata: {{"message": "ET SCAN alert detected. Blocking rule installing for {src_ip}"}}\n\n'
+                        timestamp = alert_data.get("timestamp")
+                        yield f'event: notify\ndata: {{"message": "{timestamp} ET SCAN alert detected. Blocking rule installing for {src_ip}"}}\n\n'
                     elif "ET DOS" in signature and src_ip and dest_ip:
-                        yield f'event: notify\ndata: {{"message": "ET DOS alert detected. Blocking rule installing for {src_ip}"}}\n\n'
+                        timestamp = alert_data.get("timestamp")
+                        yield f'event: notify\ndata: {{"message": "{timestamp} ET DOS alert detected. Blocking rule installing for {src_ip}"}}\n\n'
                     yield f"data: {json.dumps(alert_data)}\n\n"
             except json.JSONDecodeError:
                 print("Invalid JSON received from Redis.")
