@@ -17,7 +17,7 @@ def all_alert():
                     try:
                         data_json = json.loads(match.group(1))
                         message = data_json.get("message", "")
-                        ip_match = re.search(r'Blocking rule installing for ([\d\.]+) -> ([\d\.]+)', message)
+                        ip_match = re.search(r'Network Trojan alert detected. Blocking rule installing for ([\d\.]+) -> ([\d\.]+)', message)
                         if ip_match:
                             src_ip = ip_match.group(1)
                             dest_ip = ip_match.group(2)
@@ -36,6 +36,42 @@ def all_alert():
                                 print(f"[+] Block API response: {resp.status_code} {resp.text}")
                             except Exception as e:
                                 print(f"[!] Error calling block API: {e}")
+                        elif "ET SCAN" in message:
+                            ip_match = re.search(r'ET SCAN alert detected. Blocking rule installing for ([\d\.]+)', message)
+                            if ip_match:
+                                src_ip = ip_match.group(1)
+                                print(f"Calling block API for {src_ip}")
+
+                                payload = {
+                                    "switch_id": "openflow:2",
+                                    "src_ip": src_ip
+                                }
+                                try:
+                                    resp = requests.post(
+                                        "http://localhost:5000/api/rules/block",
+                                        json=payload
+                                    )
+                                    print(f"[+] Block API response: {resp.status_code} {resp.text}")
+                                except Exception as e:
+                                    print(f"[!] Error calling block API: {e}")
+                        elif "ET DOS" in message:
+                            ip_match = re.search(r'ET DOS alert detected. Blocking rule installing for ([\d\.]+)', message)
+                            if ip_match:
+                                src_ip = ip_match.group(1)
+                                print(f"Calling block API for {src_ip}")
+
+                                payload = {
+                                    "switch_id": "openflow:2",
+                                    "src_ip": src_ip
+                                }
+                                try:
+                                    resp = requests.post(
+                                        "http://localhost:5000/api/rules/block",
+                                        json=payload
+                                    )
+                                    print(f"[+] Block API response: {resp.status_code} {resp.text}")
+                                except Exception as e:
+                                    print(f"[!] Error calling block API: {e}")
                     except json.JSONDecodeError:
                         print("Error decoding notify message.")
             yield alert

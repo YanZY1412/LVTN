@@ -17,12 +17,16 @@ def get_alerts():
             try:
                 alert_data = json.loads(alert)
                 if alert_data.get("event_type") == "alert": 
-                    severity = alert_data.get("alert", {}).get("severity", 5)
+                    category = alert_data.get("alert", {}).get("category", "Unknown")
+                    signature = alert_data.get("alert", {}).get("signature", "Unknown")
                     src_ip = alert_data.get("src_ip")
                     dest_ip = alert_data.get("dest_ip")
-                    if severity == 1 and src_ip and dest_ip:
-                        print(f"[+] High severity alert detected (Severity {severity}). Installing block rule for {src_ip} -> {dest_ip}")              
-                        yield f'event: notify\ndata: {{"message": "Blocking rule installing for {src_ip} -> {dest_ip}"}}\n\n'
+                    if "A Network Trojan" in category and src_ip and dest_ip:
+                        yield f'event: notify\ndata: {{"message": "Network Trojan alert detected. Blocking rule installing for {src_ip} -> {dest_ip}"}}\n\n'
+                    elif "ET SCAN" in signature and src_ip and dest_ip:
+                        yield f'event: notify\ndata: {{"message": "ET SCAN alert detected. Blocking rule installing for {src_ip}"}}\n\n'
+                    elif "ET DOS" in signature and src_ip and dest_ip:
+                        yield f'event: notify\ndata: {{"message": "ET DOS alert detected. Blocking rule installing for {src_ip}"}}\n\n'
                     yield f"data: {json.dumps(alert_data)}\n\n"
             except json.JSONDecodeError:
                 print("Invalid JSON received from Redis.")

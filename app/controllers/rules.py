@@ -9,11 +9,19 @@ def block_ip_traffic():
     switch_id = data.get("switch_id")
     src_ip = data.get("src_ip")
     dst_ip = data.get("dst_ip")
+    if not switch_id:
+        return jsonify({"error": "Missing switch_id"}), 400
+    existing_rules = list_rules(switch_id)
+    existing_flow_ids = {rule.get("flow_id") for rule in existing_rules}
     result = []
     if src_ip:
-        result.extend(install_block_flow_rule(switch_id, src_ip, f"block-{src_ip.replace('.', '-') }"))
+        flow_id = f"block-{src_ip.replace('.', '-')}"
+        if f"{flow_id}-in" not in existing_flow_ids:
+            result.extend(install_block_flow_rule(switch_id, src_ip, f"block-{src_ip.replace('.', '-') }"))
     if dst_ip:
-        result.extend(install_block_flow_rule(switch_id, dst_ip, f"block-{dst_ip.replace('.', '-') }"))
+        flow_id = f"block-{dst_ip.replace('.', '-')}"
+        if f"{flow_id}-in" not in existing_flow_ids:
+            result.extend(install_block_flow_rule(switch_id, dst_ip, f"block-{dst_ip.replace('.', '-') }"))
     return jsonify(result)
 
 @rules_bp.route("/list_node_rules", methods=["GET"])
